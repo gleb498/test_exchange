@@ -1,0 +1,5 @@
+.vscode
+.cache
+_debug
+_release
+compile_commands.json
