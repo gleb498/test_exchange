@@ -1,6 +1,6 @@
 #include "application.hpp"
 
-#include <network/server.hpp>
+#include <network/client.hpp>
 
 #include <spdlog/spdlog.h>
 #include <boost/asio/signal_set.hpp>
@@ -9,7 +9,7 @@ namespace exchange {
     application::application(config::settings& cfg)
     :   _cfg(cfg),
         _threads(_context),
-        _server(net::server::create(*this))
+        _client(net::client::create(*this))
     {}
 
     application::~application()
@@ -41,19 +41,19 @@ namespace exchange {
                 stop(); 
         });
 
-        std::size_t n = _threads.start();
+        std::size_t n = _threads.start(2);
         spdlog::info("started {} threads in main thread pool", n);
 
-        _server->start();
+        _client->connect();
 
         _threads.join();
     }
 
     void application::stop()
     {
-        spdlog::info("stop exchange app");
-        
-        _server->stop();
+        spdlog::info("stop client app");
+
+        _client->stop();
         _context.stop();
     }
 }

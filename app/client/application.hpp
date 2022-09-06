@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace exchange::net {
-    class server;
+    class client;
 }
 
 namespace exchange::config {
@@ -37,6 +37,6 @@ namespace exchange {
         config::settings&               _cfg;
         boost::asio::io_context         _context;
         core::io_threads                _threads;
-        std::shared_ptr<net::server>    _server;
+        std::shared_ptr<net::client>    _client;
     };
 }
