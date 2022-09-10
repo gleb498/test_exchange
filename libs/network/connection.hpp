@@ -3,6 +3,7 @@
 #include <api_network.hpp>
 #include <core/factory.hpp>
 
+#include <boost/signals2.hpp>
 #include <boost/asio.hpp>
 
 namespace exchange::api {
@@ -10,6 +11,9 @@ namespace exchange::api {
 }
 
 namespace exchange::net {
+
+    class exec;
+
     class connection : public core::factory<connection>
     {
         friend class core::factory<connection>;
@@ -21,6 +25,11 @@ namespace exchange::net {
         ~connection();
 
         void start();
+        void stop();
+
+        api::net::endpoint_t endpoint() const { return _endpoint; }
+
+        boost::signals2::signal<void(std::shared_ptr<connection>)>  on_disconect_event;
 
     private:
         void async_read();
@@ -31,6 +40,7 @@ namespace exchange::net {
 
     private:
         api::app&               _app;
+        exec&                   _exec;
         api::net::socket_t      _s;
         api::net::endpoint_t    _endpoint;
 

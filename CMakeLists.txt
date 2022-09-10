@@ -16,7 +16,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_compile_options(-Wall -Werror -Wfatal-errors -Wno-deprecated)
+add_compile_options(-Wall -Werror -Wfatal-errors -Wno-deprecated -fpic)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
@@ -48,7 +48,9 @@ set(PROJECT_MODULES core network config)
 
 include_directories("libs")
 include_directories("include")
+include_directories("app")
 include_directories("3rd/spdlog/include")
+include_directories("3rd/cli/include")
 
 include(project)
 

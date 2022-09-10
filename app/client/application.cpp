@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "console.hpp"
 
 #include <network/client.hpp>
 
@@ -8,9 +9,11 @@
 namespace exchange {
     application::application(config::settings& cfg)
     :   _cfg(cfg),
-        _threads(_context),
-        _client(net::client::create(*this))
-    {}
+        _threads(_context)
+    {
+        _client = net::client::create(_context, *this);
+        _console = cli::console::create(_context, *this);
+    }
 
     application::~application()
     {
@@ -32,6 +35,11 @@ namespace exchange {
         return _cfg;
     }
 
+    net::client& application::get_client()
+    {
+        return *_client;
+    }
+
     void application::start()
     {
         boost::asio::signal_set signals(_context, SIGINT, SIGTERM);
@@ -41,9 +49,10 @@ namespace exchange {
                 stop(); 
         });
 
-        std::size_t n = _threads.start(2);
+        std::size_t n = _threads.start();
         spdlog::info("started {} threads in main thread pool", n);
 
+        // _console->start();
         _client->connect();
 
         _threads.join();
@@ -53,6 +62,7 @@ namespace exchange {
     {
         spdlog::info("stop client app");
 
+        _console->stop();
         _client->stop();
         _context.stop();
     }

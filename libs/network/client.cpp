@@ -1,5 +1,5 @@
 #include "client.hpp"
-#include <api_app.hpp>
+#include <exchange/application.hpp>
 #include <config/settings.hpp>
 
 #include <boost/asio/write.hpp>
@@ -10,15 +10,18 @@
 
 namespace exchange::net {
 
-    client::client(api::app& app)
+    client::client(boost::asio::io_context& context, exchange::application& app)
     :   _app(app),
-        _context(app.get_context()),
+        _context(context),
         _s(_context)
     {}
 
     void client::connect()
     {
         api::net::tcp::resolver r(_context);
+        _app.get_context();
+        _app.get_settings();
+        _app.get_settings().endpoint();
         api::net::tcp::resolver::query query(api::net::tcp::v4(),   _app.get_settings().address().to_string(),
                                                                     std::to_string(_app.get_settings().port()));
         api::net::tcp::resolver::iterator it = r.resolve(query);
@@ -53,6 +56,8 @@ namespace exchange::net {
             spdlog::info("connected to {}:{}",  endpoint_iter->endpoint().address().to_string(), 
                                                 std::to_string(endpoint_iter->endpoint().port()));
 
+            on_connect_event();
+
             call("ping");
         }
     }
@@ -71,6 +76,8 @@ namespace exchange::net {
         if (!ec)
         {
             spdlog::info("received: {}", std::string(_rbuffer));
+
+            on_msg_event();
 
             start_read();
         }
@@ -104,7 +111,7 @@ namespace exchange::net {
         {
             spdlog::info("client closed...");
         }
-        
+
         _app.get_context().post([this](){ _app.stop(); });
     }
 

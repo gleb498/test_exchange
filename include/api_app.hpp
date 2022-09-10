@@ -8,6 +8,10 @@ namespace exchange::config {
     class settings;
 }
 
+namespace exchange::net {
+    class hub;
+}
+
 namespace exchange::api {
     class app
     {
@@ -17,5 +21,6 @@ namespace exchange::api {
         virtual void stop() = 0;
         virtual boost::asio::io_context& get_context() = 0;
         virtual const config::settings& get_settings() const = 0;
+        virtual exchange::net::hub& get_hub() = 0;
     };
 }

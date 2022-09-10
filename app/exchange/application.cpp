@@ -1,6 +1,6 @@
 #include "application.hpp"
 
-#include <network/server.hpp>
+#include <network/hub.hpp>
 
 #include <spdlog/spdlog.h>
 #include <boost/asio/signal_set.hpp>
@@ -9,7 +9,7 @@ namespace exchange {
     application::application(config::settings& cfg)
     :   _cfg(cfg),
         _threads(_context),
-        _server(net::server::create(*this))
+        _hub(net::hub::create(*this))
     {}
 
     application::~application()
@@ -32,6 +32,11 @@ namespace exchange {
         return _cfg;
     }
 
+    net::hub& application::get_hub()
+    {
+        return *_hub;
+    }
+
     void application::start()
     {
         boost::asio::signal_set signals(_context, SIGINT, SIGTERM);
@@ -44,7 +49,7 @@ namespace exchange {
         std::size_t n = _threads.start();
         spdlog::info("started {} threads in main thread pool", n);
 
-        _server->start();
+        _hub->start();
 
         _threads.join();
     }
@@ -53,7 +58,7 @@ namespace exchange {
     {
         spdlog::info("stop exchange app");
         
-        _server->stop();
+        _hub->stop();
         _context.stop();
     }
 }

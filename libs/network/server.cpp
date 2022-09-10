@@ -47,8 +47,16 @@ namespace exchange::net {
 
     void server::stop()
     {
+        std::unique_lock ul(_mutex);
+        for (auto& c: _conns)
+            c->stop();
+        
+        _conns.clear();
+        ul.unlock();
+        
         if (!_s.is_open())
             return;
+
         _s.close();
     }
 
@@ -69,6 +77,19 @@ namespace exchange::net {
         auto end = s.remote_endpoint();
         spdlog::info("accepted from {}", end.address().to_string() + ":" + std::to_string(end.port()));
         auto c = net::connection::create(_app, std::move(s));
+        
+        std::unique_lock ul(_mutex);
+        _conns.emplace(c);
+        _mutex.unlock();
+
+        c->on_disconect_event.connect([this](std::shared_ptr<connection> con)
+        {
+            spdlog::info("connection {}:{} closed", con->endpoint().address().to_string(), con->endpoint().port());
+            std::unique_lock ul(_mutex);
+            _conns.erase(con);
+            _mutex.unlock();
+        });
+
         _app.get_context().post([c]() { c->start(); });
         start_accept();
     }

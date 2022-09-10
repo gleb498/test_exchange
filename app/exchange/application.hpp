@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace exchange::net {
-    class server;
+    class hub;
 }
 
 namespace exchange::config {
@@ -27,8 +27,9 @@ namespace exchange {
         void run() override;
         void stop() override;
         
-        boost::asio::io_context& get_context() override;
-        const config::settings& get_settings() const override;
+        boost::asio::io_context&    get_context() override;
+        const config::settings&     get_settings() const override;
+        net::hub&                   get_hub() override;
 
     private:
         void start();
@@ -37,6 +38,6 @@ namespace exchange {
         config::settings&               _cfg;
         boost::asio::io_context         _context;
         core::io_threads                _threads;
-        std::shared_ptr<net::server>    _server;
+        std::shared_ptr<net::hub>       _hub;
     };
 }

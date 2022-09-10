@@ -2,13 +2,14 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/signals2.hpp>
 #include <api_network.hpp>
 
 #include <core/factory.hpp>
 #include <atomic>
 
-namespace exchange::api {
-    class app;
+namespace exchange {
+    class application;
 }
 
 namespace exchange::net {
@@ -18,12 +19,15 @@ namespace exchange::net {
         friend class core::factory<client>;
 
     private:
-        client(api::app& app);
+        client(boost::asio::io_context&, exchange::application& app);
 
     public:
         void connect();
         void call(const std::string& msg);
         void stop();
+
+        boost::signals2::signal<void()>     on_connect_event;
+        boost::signals2::signal<void()>     on_msg_event;
 
     private:
         void start_connect(api::net::tcp::resolver::iterator endpoint_iter);
@@ -32,13 +36,11 @@ namespace exchange::net {
 
         void start_read();
         void handle_read(const boost::system::error_code& ec);
-
         void handle_write(const boost::system::error_code& ec);
-
         void handle_error(const boost::system::error_code& ec);
         
     private:
-        api::app&                   _app;
+        exchange::application&      _app;
         boost::asio::io_context&    _context;
         api::net::tcp::socket       _s;
         std::atomic_int32_t         _id;

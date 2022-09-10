@@ -1,3 +1,9 @@
 [submodule "3rd/spdlog"]
 	path = 3rd/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "3rd/cli"]
+	path = 3rd/cli
+	url = https://github.com/daniele77/cli
+[submodule "3rd/catch2"]
+	path = 3rd/catch2
+	url = https://github.com/catchorg/Catch2
